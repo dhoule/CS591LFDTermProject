@@ -51,7 +51,7 @@ def preprocess_image(full_path, label=None):
     # 1 = Use the image's
     # 2 = Output a black & white image
     # 3 = Output a RGB image
-  img = tf.image.decode_jpeg(img_raw, channels=3) 
+  img = tf.image.decode_jpeg(img_raw, channels=2) 
   # Currently, all images have a height: 250 & width: 400, but had to force the values to work anyways.
   img = tf.image.resize_images(img, [250, 400])
   image  = img / 255.0  # normalize to [0,1] range
