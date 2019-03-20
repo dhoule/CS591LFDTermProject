@@ -147,7 +147,7 @@ model = tf.keras.Sequential([
   # tf.keras.layers.GlobalAveragePooling2D(),
   # tf.keras.layers.Dense(len(class_names))])
   keras.layers.Flatten(None, input_shape=(250, 400, 1)), # transforms the format of the images from a 2d-array (of 250 by 400 pixels), to a 1d-array of 250 * 400 = 100,000 pixels.
-  keras.layers.Dense(128, activation=tf.nn.relu), # layer has 128 nodes
+  keras.layers.Dense(128, activation=tf.nn.tanh), # layer has 128 nodes
   keras.layers.Dense(3, activation=tf.nn.softmax)]) # layer has 10 nodes. returns an array of 10 probability scores that sum to 1
 
 model.compile(optimizer=tf.train.AdamOptimizer(), 
