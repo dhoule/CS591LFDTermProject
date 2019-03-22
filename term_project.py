@@ -142,21 +142,21 @@ image_batch, label_batch = next(iter(keras_ds))
 
 model = tf.keras.Sequential([
   keras.layers.Flatten(None, input_shape=(125, 200, 1)), # transforms the format of the images from a 2d-array (of 125 by 200 pixels), to a 1d-array of 125 * 200 = 25,000 pixels.
-  keras.layers.Dense(128, activation=tf.nn.tanh), # layer has 128 nodes
-  keras.layers.Dense(3, activation=tf.nn.softmax)]) # layer has 3 nodes. returns an array of 3 probability scores that sum to 1
+  keras.layers.Dense(128, activation=tf.nn.tanh), # layer has 128 nodes, fully connected to the input layer.
+  keras.layers.Dense(3, activation=tf.nn.softmax)]) # layer has 3 nodes. returns an array of 3 probability scores that sum to 1. Fully connected to the hidden layer.
 
 model.compile(optimizer=tf.train.AdamOptimizer(), 
               loss=tf.keras.losses.sparse_categorical_crossentropy,
               metrics=["accuracy"])
 
 model.fit(image_batch, label_batch, epochs=25, steps_per_epoch=3)
-
+model.save_weights(filepath="#{os.environ['CS591LFDTESTW8S']}/weights.h5")
 model.summary()
 
-ds = train_image_label_ds.apply(tf.data.experimental.shuffle_and_repeat(buffer_size=train_image_count))
-ds = ds.batch(BATCH_SIZE).prefetch(buffer_size=AUTOTUNE)
-print(ds)
-timeit(ds)
+# ds = train_image_label_ds.apply(tf.data.experimental.shuffle_and_repeat(buffer_size=train_image_count))
+# ds = ds.batch(BATCH_SIZE).prefetch(buffer_size=AUTOTUNE)
+# print(ds)
+# timeit(ds)
 
 
 
