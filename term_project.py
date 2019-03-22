@@ -134,8 +134,6 @@ ds = ds.batch(BATCH_SIZE)
 # `prefetch` lets the dataset fetch batches, in the background while the model is training.
 ds = ds.prefetch(buffer_size=AUTOTUNE)
 
-# mobile_net = tf.keras.applications.MobileNetV2(include_top=False)
-# mobile_net.trainable=False
 # Change the range from [0,1] to [-1,1]
 keras_ds = ds.map(change_range)
 
@@ -143,9 +141,6 @@ keras_ds = ds.map(change_range)
 image_batch, label_batch = next(iter(keras_ds))
 
 model = tf.keras.Sequential([
-  # mobile_net,
-  # tf.keras.layers.GlobalAveragePooling2D(),
-  # tf.keras.layers.Dense(len(class_names))])
   keras.layers.Flatten(None, input_shape=(125, 200, 1)), # transforms the format of the images from a 2d-array (of 125 by 200 pixels), to a 1d-array of 125 * 200 = 25,000 pixels.
   keras.layers.Dense(128, activation=tf.nn.tanh), # layer has 128 nodes
   keras.layers.Dense(3, activation=tf.nn.softmax)]) # layer has 3 nodes. returns an array of 3 probability scores that sum to 1
@@ -154,7 +149,6 @@ model.compile(optimizer=tf.train.AdamOptimizer(),
               loss=tf.keras.losses.sparse_categorical_crossentropy,
               metrics=["accuracy"])
 
-# model.fit(ds, epochs=5, steps_per_epoch=3)
 model.fit(image_batch, label_batch, epochs=25, steps_per_epoch=3)
 
 model.summary()
