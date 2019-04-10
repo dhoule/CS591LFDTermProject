@@ -149,8 +149,9 @@ model.compile(optimizer=tf.train.AdamOptimizer(),
               loss=tf.keras.losses.sparse_categorical_crossentropy,
               metrics=["accuracy"])
 
-model.fit(image_batch, label_batch, epochs=25, steps_per_epoch=3)
-model.save_weights(filepath="#{os.environ['CS591LFDTESTW8S']}/weights.h5")
+model.fit(image_batch, label_batch, epochs=30, steps_per_epoch=3)
+w8File = os.environ['CS591LFDTESTW8S'] + "/weights.h5"
+model.save_weights(filepath=w8File)
 model.summary()
 
 # ds = train_image_label_ds.apply(tf.data.experimental.shuffle_and_repeat(buffer_size=train_image_count))
