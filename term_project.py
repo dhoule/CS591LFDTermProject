@@ -66,26 +66,6 @@ def preprocess_image(full_path, label=None):
 def change_range(image,label):
   return 2*image-1, label
 
-# Function is used to test the performance of the datasets.
-def timeit(ds, batches=2*3+1):
-  overall_start = time.time()
-  # Fetch a single batch to prime the pipeline (fill the shuffle buffer),
-  # before starting the timer
-  it = iter(ds.take(batches+1))
-  next(it)
-
-  start = time.time()
-  for i,(images,labels) in enumerate(it):
-    if i%10 == 0:
-      print('.',end='')
-  print()
-  end = time.time()
-
-  duration = end-start
-  print("{} batches: {} s".format(batches, duration))
-  print("{:0.5f} Images/s".format(BATCH_SIZE*batches/duration))
-  print("Total time: {}s".format(end-overall_start))
-
 class_names = ['handgun', 'rifle', 'shotgun'] # List of available labels for the images
 localTrainDir = os.environ['CS591LFDTRAINDIR'] # Location where the training image dataset is kept
 localTestDir = os.environ['CS591LFDTESTDIR'] # Location where the test image dataset is kept
@@ -126,39 +106,49 @@ test_image_label_ds = test_path_ds.map(preprocess_image, num_parallel_calls=AUTO
 
 # Setting a shuffle buffer size as large as the dataset ensures that the data is
 # completely shuffled.
-ds = train_image_label_ds.shuffle(buffer_size=train_image_count)
-ds = ds.repeat()
-ds = ds.batch(BATCH_SIZE)
+train_ds = train_image_label_ds.shuffle(buffer_size=train_image_count)
+train_ds = train_ds.repeat()
+train_ds = train_ds.batch(BATCH_SIZE)
+
+test_ds = test_image_label_ds.shuffle(buffer_size=test_image_count)
+test_ds = test_ds.repeat()
+test_ds = test_ds.batch(BATCH_SIZE)
 
 
 # `prefetch` lets the dataset fetch batches, in the background while the model is training.
-ds = ds.prefetch(buffer_size=AUTOTUNE)
+train_ds = train_ds.prefetch(buffer_size=AUTOTUNE)
+
+test_ds = test_ds.prefetch(buffer_size=AUTOTUNE)
 
 # Change the range from [0,1] to [-1,1]
-keras_ds = ds.map(change_range)
+keras_train_ds = train_ds.map(change_range)
+
+keras_test_ds = test_ds.map(change_range)
 
 # The dataset may take a few seconds to start, as it fills its shuffle buffer.
-image_batch, label_batch = next(iter(keras_ds))
+train_image_batch, train_label_batch = next(iter(keras_train_ds))
+
+test_image_batch, test_label_batch = next(iter(keras_test_ds))
+
+cb = tf.keras.callbacks.EarlyStopping(monitor='acc')
 
 model = tf.keras.Sequential([
   keras.layers.Flatten(None, input_shape=(125, 200, 1)), # transforms the format of the images from a 2d-array (of 125 by 200 pixels), to a 1d-array of 125 * 200 = 25,000 pixels.
-  keras.layers.Dense(128, activation=tf.nn.tanh), # layer has 128 nodes, fully connected to the input layer.
+  keras.layers.Dense(128, activation=tf.nn.relu), # layer has 128 nodes, fully connected to the input layer.
   keras.layers.Dense(3, activation=tf.nn.softmax)]) # layer has 3 nodes. returns an array of 3 probability scores that sum to 1. Fully connected to the hidden layer.
 
 model.compile(optimizer=tf.train.AdamOptimizer(), 
               loss=tf.keras.losses.sparse_categorical_crossentropy,
               metrics=["accuracy"])
 
-model.fit(image_batch, label_batch, epochs=30, steps_per_epoch=3)
-w8File = os.environ['CS591LFDTESTW8S'] + "/weights.h5"
-model.save_weights(filepath=w8File)
+model.fit(train_image_batch, train_label_batch, epochs=1000, steps_per_epoch=5, callbacks=[cb])
+
+
+
+print("\nEvaluating**********************\n")
+model.evaluate(test_image_batch, test_label_batch, steps=5)
+
 model.summary()
-
-# ds = train_image_label_ds.apply(tf.data.experimental.shuffle_and_repeat(buffer_size=train_image_count))
-# ds = ds.batch(BATCH_SIZE).prefetch(buffer_size=AUTOTUNE)
-# print(ds)
-# timeit(ds)
-
 
 
 
