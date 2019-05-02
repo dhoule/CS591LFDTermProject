@@ -71,8 +71,8 @@ localTrainDir = os.environ['CS591LFDTRAINDIR'] # Location where the training ima
 localTestDir = os.environ['CS591LFDTESTDIR'] # Location where the test image dataset is kept
 
 # Load the absolute paths into arrays to be used later
-train_image_paths = get_image_paths(localTrainDir)
-test_image_paths = get_image_paths(localTestDir)
+test_image_paths = get_image_paths(localTrainDir)
+train_image_paths = get_image_paths(localTestDir)
 
 # Assign an integer to the elements in the `class_names` vairable
 class_to_index = dict((name, index) for index,name in enumerate(class_names))
@@ -134,7 +134,7 @@ cb = tf.keras.callbacks.EarlyStopping(monitor='acc')
 
 model = tf.keras.Sequential([
   keras.layers.Flatten(None, input_shape=(125, 200, 1)), # transforms the format of the images from a 2d-array (of 125 by 200 pixels), to a 1d-array of 125 * 200 = 25,000 pixels.
-  keras.layers.Dense(128, activation=tf.nn.relu), # layer has 128 nodes, fully connected to the input layer.
+  keras.layers.Dense(64, activation=tf.nn.tanh), # layer has 128 nodes, fully connected to the input layer.
   keras.layers.Dense(3, activation=tf.nn.softmax)]) # layer has 3 nodes. returns an array of 3 probability scores that sum to 1. Fully connected to the hidden layer.
 
 model.compile(optimizer=tf.train.AdamOptimizer(), 
