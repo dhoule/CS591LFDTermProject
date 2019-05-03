@@ -132,23 +132,24 @@ test_image_batch, test_label_batch = next(iter(keras_test_ds))
 
 cb = [tf.keras.callbacks.EarlyStopping(monitor='acc')]
 
-model = tf.keras.Sequential([
-  keras.layers.Flatten(None, input_shape=(125, 200, 1)), # transforms the format of the images from a 2d-array (of 125 by 200 pixels), to a 1d-array of 125 * 200 = 25,000 pixels.
-  keras.layers.Dense(64, activation=tf.nn.tanh), # layer has 128 nodes, fully connected to the input layer.
-  keras.layers.Dense(3, activation=tf.nn.softmax)]) # layer has 3 nodes. returns an array of 3 probability scores that sum to 1. Fully connected to the hidden layer.
+for i in range(100):
+  model = tf.keras.Sequential([
+    keras.layers.Flatten(None, input_shape=(125, 200, 1)), # transforms the format of the images from a 2d-array (of 125 by 200 pixels), to a 1d-array of 125 * 200 = 25,000 pixels.
+    keras.layers.Dense(64, activation=tf.nn.tanh), # layer has 128 nodes, fully connected to the input layer.
+    keras.layers.Dense(3, activation=tf.nn.softmax)]) # layer has 3 nodes. returns an array of 3 probability scores that sum to 1. Fully connected to the hidden layer.
 
-model.compile(optimizer=tf.train.AdamOptimizer(), 
-              loss=tf.keras.losses.sparse_categorical_crossentropy,
-              metrics=["accuracy"])
+  model.compile(optimizer=tf.train.AdamOptimizer(), 
+                loss=tf.keras.losses.sparse_categorical_crossentropy,
+                metrics=["accuracy"])
 
-model.fit(train_image_batch, train_label_batch, epochs=10, steps_per_epoch=5, callbacks=cb)
+  model.fit(train_image_batch, train_label_batch, epochs=10, steps_per_epoch=5, callbacks=cb)
 
 
 
-print("\nEvaluating**********************\n")
-model.evaluate(test_image_batch, test_label_batch, steps=5)
+  print("\nEvaluating**********************\n")
+  model.evaluate(test_image_batch, test_label_batch, steps=5)
 
-model.summary()
+  model.summary()
 
 
 
