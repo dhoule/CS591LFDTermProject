@@ -6,7 +6,7 @@ import re
 import operator
 import random
 import pathlib
-import time
+import sys
 
 # TensorFlow and tf.keras
 import tensorflow as tf
@@ -19,6 +19,11 @@ import matplotlib.pyplot as plt
 tf.enable_eager_execution()
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 BATCH_SIZE = 32
+
+MULTI = 0 # This is the attribute to multiply the hidden layer by.
+
+if len(sys.argv) > 1:
+  MULTI = int(sys.argv[1]) # Using `for i in `seq 1 100`; do python3 term_project.py $i;  done`, it will not be 0 based.
 
 # Function recursivelly itterates through the path given to it, 'local_dir'.
   # For all of the files in the current directory, 
@@ -133,30 +138,30 @@ test_image_batch, test_label_batch = next(iter(keras_test_ds))
 
 cb = tf.keras.callbacks.EarlyStopping(monitor='acc')
 filestart = '/Users/caine2003/Documents/CS591LFDTermProject/'
-for q in range(2):#range(42):
-  for i in range(50):
-    # filename = "%s_size_%d_run_%d.csv" % (filestart,(q + 1),(i + 1))
-    # csv_logger = tf.keras.callbacks.CSVLogger(filename)
-    model = tf.keras.Sequential([
-      keras.layers.Flatten(None, input_shape=(125, 200, 1)), # transforms the format of the images from a 2d-array (of 125 by 200 pixels), to a 1d-array of 125 * 200 = 25,000 pixels.
-      keras.layers.Dense((3 * (q+1)), activation=tf.nn.relu), # layer has 3*q nodes. Fully connected to the input layer.
-      keras.layers.Dense(3, activation=tf.nn.softmax)]) # layer has 3 nodes. returns an array of 3 probability scores that sum to 1. Fully connected to the hidden layer.
 
-    model.compile(optimizer=tf.train.AdamOptimizer(), 
-                  loss=tf.keras.losses.sparse_categorical_crossentropy,
-                  metrics=["accuracy"])
+for i in range(50):
+  filename = "%s_size_%d_run_%d.csv" % (filestart,MULTI,(i + 1))
+  csv_logger = tf.keras.callbacks.CSVLogger(filename)
+  model = tf.keras.Sequential([
+    keras.layers.Flatten(None, input_shape=(125, 200, 1)), # transforms the format of the images from a 2d-array (of 125 by 200 pixels), to a 1d-array of 125 * 200 = 25,000 pixels.
+    keras.layers.Dense((3 * MULTI), activation=tf.nn.relu), # layer has 3*MULTI nodes. Fully connected to the input layer.
+    keras.layers.Dense(3, activation=tf.nn.softmax)]) # layer has 3 nodes. returns an array of 3 probability scores that sum to 1. Fully connected to the hidden layer.
 
-    model.fit(train_image_batch, train_label_batch, epochs=20, steps_per_epoch=5, callbacks=[cb])#,csv_logger])
-    append = model.evaluate(test_image_batch, test_label_batch, steps=5)
+  model.compile(optimizer=tf.train.AdamOptimizer(), 
+                loss=tf.keras.losses.sparse_categorical_crossentropy,
+                metrics=["accuracy"])
 
-    # Need to apped to the file with a list. Loss, then accuracy.
-    # f = open(filename, "a+")
-    # f.write("%d,%f,%f" % ((cb.stopped_epoch + 1), append[1], append[0]))
-    # f.flush()
-    # f.close()
-    # del csv_logger
-    # del model
-    # del f
+  model.fit(train_image_batch, train_label_batch, epochs=20, steps_per_epoch=5, callbacks=[cb,csv_logger])
+  append = model.evaluate(test_image_batch, test_label_batch, steps=5)
+
+  # Need to apped to the file with a list. Loss, then accuracy.
+  f = open(filename, "a+")
+  f.write("%d,%f,%f" % ((cb.stopped_epoch + 1), append[1], append[0]))
+  f.flush()
+  f.close()
+  del csv_logger
+  del model
+  del f
     
     
 
