@@ -140,7 +140,7 @@ cb = tf.keras.callbacks.EarlyStopping(monitor='acc')
 filestart = '/Users/caine2003/Documents/CS591LFDTermProject/'
 
 for i in range(50):
-  filename = "%s_size_%d_run_%d.csv" % (filestart,MULTI,(i + 1))
+  filename = "%sversion_%d_size_%d_run_%d.csv" % (filestart,MULTI,(MULTI * 3),(i + 1))
   csv_logger = tf.keras.callbacks.CSVLogger(filename)
   model = tf.keras.Sequential([
     keras.layers.Flatten(None, input_shape=(125, 200, 1)), # transforms the format of the images from a 2d-array (of 125 by 200 pixels), to a 1d-array of 125 * 200 = 25,000 pixels.
